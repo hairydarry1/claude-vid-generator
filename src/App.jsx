@@ -394,6 +394,96 @@ const styles = `
 
   .chip:hover { border-color: rgba(255,100,50,0.4); color: #ff6432; background: rgba(255,100,50,0.05); }
 
+  .video-tools {
+    margin-top: 24px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease 0.1s both;
+  }
+
+  .video-tools-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .video-tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  @media (max-width: 500px) {
+    .video-tools-grid { grid-template-columns: 1fr; }
+  }
+
+  .video-tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #0a0a0f;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .video-tool-btn:hover { background: rgba(255,255,255,0.03); }
+
+  .tool-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .tool-info { text-align: left; }
+
+  .tool-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e8e4d9;
+    margin-bottom: 2px;
+  }
+
+  .tool-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 0.05em;
+  }
+
+  .tool-arrow {
+    margin-left: auto;
+    color: #333;
+    font-size: 14px;
+    transition: transform 0.15s;
+  }
+
+  .video-tool-btn:hover .tool-arrow { transform: translateX(3px); color: #ff6432; }
+
+  .video-tools-note {
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #333;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    letter-spacing: 0.05em;
+  }
+
   .history-empty {
     text-align: center;
     padding: 60px 20px;
@@ -559,6 +649,13 @@ const durationMap = {
   medium: "15-30 second sequence with 2-3 cuts",
   long: "60+ second narrative sequence with multiple scenes",
 };
+
+const VIDEO_TOOLS = [
+  { name: "Kling AI", desc: "Free daily credits · Best quality", icon: "🎬", color: "rgba(100,200,255,0.15)", url: "https://klingai.com" },
+  { name: "Pika Labs", desc: "Free tier · Fast generation", icon: "⚡", color: "rgba(180,100,255,0.15)", url: "https://pika.art" },
+  { name: "Runway", desc: "Free trial credits · Pro quality", icon: "🚀", color: "rgba(255,100,50,0.15)", url: "https://runwayml.com" },
+  { name: "Hailuo AI", desc: "Free generations · Easy to use", icon: "🌊", color: "rgba(50,200,150,0.15)", url: "https://hailuoai.video" },
+];
 
 export default function App() {
   const [tab, setTab] = useState("generate");
@@ -769,6 +866,35 @@ export default function App() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {result && (
+              <div className="video-tools">
+                <div className="video-tools-header">▶ Make your video — click a tool to open it</div>
+                <div className="video-tools-grid">
+                  {VIDEO_TOOLS.map(tool => (
+                    <a
+                      key={tool.name}
+                      href={tool.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="video-tool-btn"
+                      onClick={() => {
+                        const full = `${result.mainPrompt} Camera: ${result.cameraWork}. Lighting: ${result.lighting}. Mood: ${result.mood}.`;
+                        navigator.clipboard.writeText(full);
+                      }}
+                    >
+                      <div className="tool-icon" style={{background: tool.color}}>{tool.icon}</div>
+                      <div className="tool-info">
+                        <div className="tool-name">{tool.name}</div>
+                        <div className="tool-desc">{tool.desc}</div>
+                      </div>
+                      <span className="tool-arrow">→</span>
+                    </a>
+                  ))}
+                </div>
+                <div className="video-tools-note">✦ Clicking any tool automatically copies your prompt — just paste it in</div>
               </div>
             )}
           </div>
