@@ -267,16 +267,6 @@ const styles = `
     color: #6dc;
   }
 
-  .result-text {
-    padding: 24px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.8;
-    color: #c8c4b9;
-    white-space: pre-wrap;
-    font-style: italic;
-  }
-
   .sections {
     display: flex;
     flex-direction: column;
@@ -401,28 +391,13 @@ export default function App() {
     };
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+         const response = await fetch("/.netlify/functions/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: `You are an expert AI video prompt engineer for platforms like Sora, Runway, Kling, and Pika. Generate a highly detailed, professional video generation prompt based on this idea: "${idea}"
-
-Style: ${styleMap[style]}
-Duration: ${durationMap[duration]}
-
-Return ONLY a JSON object with these exact keys (no markdown, no explanation):
-{
-  "mainPrompt": "The complete, detailed prompt optimized for AI video generation (2-4 sentences, rich with visual details, camera movement, lighting, mood)",
-  "cameraWork": "Specific camera movement and shot type (e.g. slow dolly-in, overhead drone shot, handheld tracking)",
-  "lighting": "Detailed lighting description (e.g. golden hour backlighting, neon-drenched cyberpunk night, soft diffused overcast)",
-  "mood": "Atmospheric mood and emotional tone",
-  "negativePrompt": "What to avoid (blurry, watermark, text, distorted faces, etc.)"
-}`
-          }]
+          idea,
+          style: styleMap[style],
+          duration: durationMap[duration]
         })
       });
 
