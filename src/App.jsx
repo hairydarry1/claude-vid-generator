@@ -453,7 +453,7 @@ Return ONLY a JSON object with these exact keys (no markdown, no explanation):
       <style>{styles}</style>
       <div className="container">
         <div className="header">
-          <div className="eyebrow">✦ Powered by Claude AI</div>
+          <div className="eyebrow">✦ NA MICHAEL RUN AM</div>
           <h1>AI Video<br /><span>Prompt</span> Studio</h1>
           <p className="subtitle">describe any idea → get a production-ready video prompt</p>
         </div>
