@@ -18,9 +18,14 @@ exports.handler = async function(event) {
     );
 
     const data = await response.json();
+    console.log("FULL GEMINI RESPONSE:", JSON.stringify(data));
+
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    console.log("RAW TEXT:", raw);
+
     const clean = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
+    console.log("PARSED:", JSON.stringify(parsed));
 
     return {
       statusCode: 200,
@@ -28,6 +33,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({ content: [{ text: JSON.stringify(parsed) }] })
     };
   } catch (err) {
+    console.log("ERROR:", err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
