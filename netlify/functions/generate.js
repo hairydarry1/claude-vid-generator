@@ -10,7 +10,7 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are an expert AI video prompt engineer. Generate a prompt for: "${idea}". Style: ${style}. Duration: ${duration}. Return ONLY a JSON object with keys: mainPrompt, cameraWork, lighting, mood, negativePrompt. No markdown, no explanation.`
+              text: `You are an expert AI video prompt engineer. Generate a prompt for: "${idea}". Style: ${style}. Duration: ${duration}. Return ONLY a raw JSON object with these exact keys: mainPrompt, cameraWork, lighting, mood, negativePrompt. No markdown, no backticks, no explanation, just the JSON object.`
             }]
           }]
         })
@@ -18,11 +18,14 @@ exports.handler = async function(event) {
     );
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const clean = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: [{ text }] })
+      body: JSON.stringify({ content: [{ text: JSON.stringify(parsed) }] })
     };
   } catch (err) {
     return {
