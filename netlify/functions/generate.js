@@ -9,7 +9,7 @@ exports.handler = async function(event) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-       model: "meta-llama/llama-3.2-3b-instruct:free",
+       model: "mistralai/mistral-7b-instruct:free",
         messages: [{
           role: "user",
           content: `You are an expert AI video prompt engineer. Generate a prompt for: "${idea}". Style: ${style}. Duration: ${duration}. Return ONLY a raw JSON object with these exact keys: mainPrompt, cameraWork, lighting, mood, negativePrompt. No markdown, no backticks, no explanation.`
