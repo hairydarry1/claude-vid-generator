@@ -424,21 +424,6 @@ const styles = `
     .video-tools-grid { grid-template-columns: 1fr; }
   }
 
-  .video-tool-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: #0a0a0f;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .video-tool-btn:hover { background: rgba(255,255,255,0.03); }
-
   .tool-icon {
     width: 36px;
     height: 36px;
@@ -481,6 +466,101 @@ const styles = `
     font-size: 10px;
     color: #333;
     border-top: 1px solid rgba(255,255,255,0.04);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .video-tool-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #0a0a0f;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 0;
+  }
+
+  .video-tool-card:hover { background: rgba(255,255,255,0.03); }
+
+  .video-tool-card.selected {
+    background: rgba(255,100,50,0.05);
+    border-color: rgba(255,100,50,0.2);
+  }
+
+  .tool-check {
+    margin-left: auto;
+    color: #ff6432;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .tool-action-bar {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,100,50,0.03);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .tool-action-prompt {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  .tool-action-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .tool-copy-btn {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #e8e4d9;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+
+  .tool-copy-btn:hover { background: rgba(255,255,255,0.1); }
+
+  .tool-open-btn {
+    flex: 2;
+    padding: 12px;
+    background: linear-gradient(135deg, #ff6432, #ff4020);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .tool-open-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(255,100,50,0.3);
+  }
+
+  .tool-action-note {
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #333;
     letter-spacing: 0.05em;
   }
 
@@ -655,6 +735,10 @@ const VIDEO_TOOLS = [
   { name: "Pika Labs", desc: "Free tier · Fast generation", icon: "⚡", color: "rgba(180,100,255,0.15)", url: "https://pika.art" },
   { name: "Runway", desc: "Free trial credits · Pro quality", icon: "🚀", color: "rgba(255,100,50,0.15)", url: "https://runwayml.com" },
   { name: "Hailuo AI", desc: "Free generations · Easy to use", icon: "🌊", color: "rgba(50,200,150,0.15)", url: "https://hailuoai.video" },
+  { name: "Luma Dream Machine", desc: "Free tier · Great quality", icon: "✨", color: "rgba(255,220,100,0.15)", url: "https://lumalabs.ai/dream-machine" },
+  { name: "Viggle", desc: "Free · Great for characters", icon: "🕺", color: "rgba(255,150,200,0.15)", url: "https://viggle.ai" },
+  { name: "Pixverse", desc: "Free tier · Easy to use", icon: "🎨", color: "rgba(150,255,180,0.15)", url: "https://pixverse.ai" },
+  { name: "Sora", desc: "OpenAI · High quality", icon: "🌀", color: "rgba(100,150,255,0.15)", url: "https://sora.com" },
 ];
 
 export default function App() {
@@ -675,6 +759,7 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem("prompt_favorites") || "[]"); } catch { return []; }
   });
   const [lastId, setLastId] = useState(null);
+  const [selectedTool, setSelectedTool] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("prompt_history", JSON.stringify(history));
@@ -689,6 +774,7 @@ export default function App() {
     setLoading(true);
     setError("");
     setResult(null);
+    setSelectedTool(null);
 
     try {
       const response = await fetch("/.netlify/functions/generate", {
@@ -871,30 +957,53 @@ export default function App() {
 
             {result && (
               <div className="video-tools">
-                <div className="video-tools-header">▶ Make your video — click a tool to open it</div>
+                <div className="video-tools-header">▶ Make your video — select a tool</div>
                 <div className="video-tools-grid">
                   {VIDEO_TOOLS.map(tool => (
-                    <a
+                    <div
                       key={tool.name}
-                      href={tool.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="video-tool-btn"
-                      onClick={() => {
-                        const full = `${result.mainPrompt} Camera: ${result.cameraWork}. Lighting: ${result.lighting}. Mood: ${result.mood}.`;
-                        navigator.clipboard.writeText(full);
-                      }}
+                      className={`video-tool-card ${selectedTool === tool.name ? "selected" : ""}`}
+                      onClick={() => setSelectedTool(tool.name)}
+                      style={selectedTool === tool.name ? {"--tool-color": tool.color} : {}}
                     >
                       <div className="tool-icon" style={{background: tool.color}}>{tool.icon}</div>
                       <div className="tool-info">
                         <div className="tool-name">{tool.name}</div>
                         <div className="tool-desc">{tool.desc}</div>
                       </div>
-                      <span className="tool-arrow">→</span>
-                    </a>
+                      {selectedTool === tool.name && <span className="tool-check">✓</span>}
+                    </div>
                   ))}
                 </div>
-                <div className="video-tools-note">✦ Clicking any tool automatically copies your prompt — just paste it in</div>
+
+                {selectedTool && (() => {
+                  const tool = VIDEO_TOOLS.find(t => t.name === selectedTool);
+                  const full = `${result.mainPrompt} Camera: ${result.cameraWork}. Lighting: ${result.lighting}. Mood: ${result.mood}.`;
+                  return (
+                    <div className="tool-action-bar">
+                      <div className="tool-action-prompt">{full.slice(0, 120)}...</div>
+                      <div className="tool-action-btns">
+                        <button className="tool-copy-btn" onClick={() => { navigator.clipboard.writeText(full); }}>
+                          📋 Copy Prompt
+                        </button>
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tool-open-btn"
+                          onClick={() => navigator.clipboard.writeText(full)}
+                        >
+                          Open {tool.name} →
+                        </a>
+                      </div>
+                      <div className="tool-action-note">Prompt copied automatically when you click Open</div>
+                    </div>
+                  );
+                })()}
+
+                {!selectedTool && (
+                  <div className="video-tools-note">✦ Select a tool above to get started</div>
+                )}
               </div>
             )}
           </div>
